@@ -10,7 +10,11 @@ const formEl = document.querySelector('.box');
 const listEl = document.querySelector('.img-list');
 const loader = document.querySelector('.this')
 let valueImp = "";
-const lightBox = new SimpleLightbox();
+const lightBox = new SimpleLightbox('.img-list a', {
+    captionsData: 'alt',
+    captionsDelay: 250,
+    overlayOpacity: 0,
+  });
 // ----------------------------
 // const options = {
 //     key: '43845947-8a1e30f8a3261d274f42ac52c',
@@ -102,18 +106,18 @@ const giveValue = (event) => {
     valueImp = event.currentTarget.value;
 };
 inputEl.addEventListener("input", giveValue);
-
-const openModal = (event) => {
-    if (event.target === event.currentTarget) {
-        return
-    };
-    lightBox.create(`
-    <img
-      src=${event.target.dataset.source}
-      alt=${event.target.alt}
-    />
-`);
-    instance.show();
-    event.preventDefault();
-};
-listEl.addEventListener("click", openModal);
+lightBox.refresh();
+// const openModal = (event) => {
+//     if (event.target === event.currentTarget) {
+//         return
+//     };
+//     lightBox.create(`
+//     <img
+//       src=${event.target.dataset.source}
+//       alt=${event.target.alt}
+//     />
+// `);
+//     instance.show();
+//     event.preventDefault();
+// };
+// listEl.addEventListener("click", openModal);

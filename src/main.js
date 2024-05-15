@@ -8,8 +8,9 @@ const inputEl = document.querySelector('.input');
 const buttonEL = document.querySelector('.form-btn');
 const formEl = document.querySelector('.box');
 const listEl = document.querySelector('.img-list');
-const loader = document.querySelector('span')
-
+const loader = document.querySelector('.this')
+let valueImp = "";
+const lightBox = new SimpleLightbox();
 // ----------------------------
 // const options = {
 //     key: '43845947-8a1e30f8a3261d274f42ac52c',
@@ -19,7 +20,8 @@ const loader = document.querySelector('span')
 //     safesearch: true,
 // };
 // const BASE_URL = 'https://pixabay.com/api/';
-import { options, BASE_URL } from "./js/pixabay-api"
+import { fetchPick } from "./js/pixabay-api";
+import { marcup } from "./js/render-functions";
 // ----------------------------
 
 
@@ -27,24 +29,24 @@ const sendForm = (event) => {
     listEl.innerHTML = "";
     event.currentTarget.reset();
     event.preventDefault();
-    if (options.q === "") {
+    if (valueImp === "") {
         return
     };
-    let params = `?key=${options.key}&q=${options.q}&image_type=${options.image_type}&orientation=${options.orientation}&safesearch=${options.safesearch}`
+    // let params = `?key=${options.key}&q=${options.q}&image_type=${options.image_type}&orientation=${options.orientation}&safesearch=${options.safesearch}`
     
-    const fetchPick = () => {
-        return fetch(`${BASE_URL}${params}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error("Запит виконався з помилкою")
-                };
-                return response.json();
-            })
-    };
-    
-    fetchPick()
+    // const fetchPick = () => {
+    //     return fetch(`${BASE_URL}${params}`)
+    //         .then(response => {
+    //             if (!response.ok) {
+    //                 throw new Error("Запит виконався з помилкою")
+    //             };
+    //             return response.json();
+    //         })
+    // };
+    loader.classList.add('loader')
+    fetchPick(valueImp)
         .then(imgs => {
-            loader.classList.add('loader');
+            loader.classList.remove('loader')
             if (imgs.hits.length === 0) {
                 console.log("Sorry, there are no images matching your search query. Please try again!");
                 iziToast.error({
@@ -54,49 +56,50 @@ const sendForm = (event) => {
                 });
                 return
             }
-            const marcup = imgs.hits.map(img => {
-                return `
-                <li class="img-item">
-                <a class="img-link" href=${img.largeImageURL}>
-                <img src="${img.webformatURL}"
-                alt="${img.tags}"
-                data-source="${img.largeImageURL}" 
-                class="img">
-                </a>
-                <div class="img-text-box">
-                <div class="img-text">
-                <h4 class="img-text-title">Likes</h4>
-                <p class="img-text-par">${img.likes}</p>
-                </div>
-                <div class="img-text">
-                <h4 class="img-text-title">Views</h4>
-                <p class="img-text-par">${img.views}</p>
-                </div>
-                <div class="img-text">
-                <h4 class="img-text-title">Comments</h4>
-                <p class="img-text-par">${img.comments}</p>
-                </div>
-                <div class="img-text">
-                <h4 class="img-text-title">Downloads</h4>
-                <p class="img-text-par">${img.downloads}</p>
-                </div>
-                </div>
-                </li>`
-            }).join('');
-            loader.classList.remove('loader');
-            listEl.insertAdjacentHTML('beforeend', marcup);
+            marcup(imgs.hits);
+            lightBox.refresh();
+            // const marcup = imgs.hits.map(img => {
+            //     return `
+            //     <li class="img-item">
+            //     <a class="img-link" href=${img.largeImageURL}>
+            //     <img src="${img.webformatURL}"
+            //     alt="${img.tags}"
+            //     data-source="${img.largeImageURL}" 
+            //     class="img">
+            //     </a>
+            //     <div class="img-text-box">
+            //     <div class="img-text">
+            //     <h4 class="img-text-title">Likes</h4>
+            //     <p class="img-text-par">${img.likes}</p>
+            //     </div>
+            //     <div class="img-text">
+            //     <h4 class="img-text-title">Views</h4>
+            //     <p class="img-text-par">${img.views}</p>
+            //     </div>
+            //     <div class="img-text">
+            //     <h4 class="img-text-title">Comments</h4>
+            //     <p class="img-text-par">${img.comments}</p>
+            //     </div>
+            //     <div class="img-text">
+            //     <h4 class="img-text-title">Downloads</h4>
+            //     <p class="img-text-par">${img.downloads}</p>
+            //     </div>
+            //     </div>
+            //     </li>`
+            // }).join('');
+            // listEl.insertAdjacentHTML('beforeend', gallery);
         })
         .catch(error => {
             console.log(error);
         });
     
-options.q = "";
+valueImp = "";
 };
 formEl.addEventListener("submit", sendForm);
 
 
 const giveValue = (event) => {
-    options.q = event.currentTarget.value;
+    valueImp = event.currentTarget.value;
 };
 inputEl.addEventListener("input", giveValue);
 
@@ -104,7 +107,7 @@ const openModal = (event) => {
     if (event.target === event.currentTarget) {
         return
     };
-    const instance = basicLightbox.create(`
+    lightBox.create(`
     <img
       src=${event.target.dataset.source}
       alt=${event.target.alt}
